@@ -1,0 +1,85 @@
+<html>
+    <head>
+        <title>Weather</title>
+        <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
+        <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+        <py-env>
+            - matplotlib
+            - pandas
+            - seaborn 
+        </py-env>
+    </head>
+    <body>
+        <div class="jumbotron">
+            <hr class="my-4">
+            <h1>Weather Data</h1>
+            <hr class="my-4">
+            <p class="lead">Weather graphs</p>
+            <a class="btn btn-outline-dark btn-lg" href="https://www.google.com/search?q=weather+today+in+london&rlz=1C1CHZN_enIN982IN982&oq=weather+today+in+london&aqs=chrome..69i57j0i512l9.7357j1j7&sourceid=chrome&ie=UTF-8" role="button" aria-pressed="true">Weather 2day</a>
+        </div>
+        <div class="row">
+            <div class="col-sm-4 p-2 ml-4 mb-1">
+            <button type="button" class="btn btn-primary btn-lg">Select chart from list:</button>   
+            <div class="col-sm-4 p-2 mr-4 mb-1">
+                <select class="from-control" id="select">
+                    <option value="Tmin">Minimum temperature</option>
+                    <option value="Tmax">Maximum Temperature</option>
+                    <option value="Sun">Sun</option>
+                    <option valu="Rain">Rain</option>
+                </select>
+            </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6 p-2 shadow ml-4 mr-4 mb-4 bg-white rounded">
+                   <div id="chart1"></div>
+                </div>
+             </div>
+        <py-script>
+            import pandas as pd
+            import matplotlib.pyplot as plt
+            import seaborn as sns
+            from pyodide.http import open_url
+            url = 'https://raw.githubusercontent.com/alanjones2/uk-historical-weather/main/data/Heathrow.csv'
+            content=open_url(url)
+            df=pd.read_csv(content)
+            df = df[df['Year']==2020]
+            def plot(chart):
+                fig, ax = plt.subplots()
+                sns.lineplot(y=chart, x="Month", data=df, ax=ax)
+                pyscript.write("chart1",fig)
+            from js import document
+            from pyodide import create_proxy
+            def selectChange(event):
+                choice = document.getElementById("select").value
+                plot(choice)
+            def setup():
+                change_proxy = create_proxy(selectChange)
+                e = document.getElementById("select")
+                e.addEventListener("change", change_proxy)
+            setup()
+            plot('Tmax')
+        </py-script>
+        <hr class="my-4">
+        <py-repl>
+            import pandas as pd
+            import matplotlib.pyplot as plt
+            import seaborn as sns
+        </py-repl>
+        <py-repl>
+            from pyodide.http import open_url
+            url = 'https://raw.githubusercontent.com/alanjones2/uk-historical-weather/main/data/Heathrow.csv'
+            content=open_url(url)
+            df=pd.read_csv(content)
+            df = df[df['Year']==2020]
+        </py-repl>
+        <py-repl>
+            def plot(chart):
+            fig, ax = plt.subplots()
+            sns.lineplot(y=chart, x="Month", data=df, ax=ax)
+            pyscript.write("chart1",fig)
+            plot('Tmax')
+        </py-repl>
+    
+    </body>
+</html>
